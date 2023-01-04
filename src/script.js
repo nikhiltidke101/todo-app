@@ -2,23 +2,22 @@ const todoList = [
     {
         id: 1,
         todoText: "Get Groceries",
-        status: "To-Do",
-        statusCode: 1,
+        statusCode: 0,
     },
     {
         id: 2,
         todoText: "Complete Task",
-        status: "Completed",
-        statusCode: 3,
+        statusCode: 2,
     },
     {
         id: 3,
         todoText: "Write Notes",
-        status: "In-Progress",
-        statusCode: 2,
+        statusCode: 1,
     }
     
 ];
+
+const status = ["To-Do", "In-Progress", "Completed"];
 
 function compare( a, b ) {
     if ( a.statusCode < b.statusCode){
@@ -28,29 +27,38 @@ function compare( a, b ) {
 }
   
 const todoListElement = document.querySelector("#todo-table");
-
 document.querySelector("#add-task").addEventListener("click", addTodo);
+
 displayTodos();
 
 function addTodo (){
-    const todoText = document.querySelector("#input-name").value;
+    const editForm = document.querySelector("#overlay");
+    editForm.classList.remove("hidden");
 
-    if (todoText == "") {
+    document.querySelector("#edit-task").addEventListener("click", ()=> {
+        const editStatus = document.querySelector("#edit-status").value;
+        const todoText = document.querySelector("#edit-input").value;
+       
+        if(todoText == ""){
+            alert("You did not enter any item");
+        }else{
+            const todoObject = {
+                id: todoList.length+1,
+                todoText: todoText,
+                status: editStatus,
+            };
+    
+            todoList.push(todoObject);
+    
+            console.log(todoList);
+            displayTodos();
+            editForm.classList.add("hidden");
+        }
+    });
 
-        alert("You did not enter any item");
-
-    } else {
-        const todoObject = {
-            id: todoList.length+1,
-            todoText: todoText,
-            status: "To-Do",
-        };
-
-        todoList.push(todoObject);
-        todoList.sort();
-        console.log(todoList);
-        displayTodos();
-    }
+    document.querySelector("#overlay-close").addEventListener("click", () => {
+        editForm.classList.add("hidden");
+    })
 }
 
 function editTodo () {
@@ -80,12 +88,17 @@ function editTodo () {
                 }
 
                 if(editStatus.value !== ""){
-                    todoList[elementIndex].status = editStatus.value;
+                    todoList[elementIndex].statusCode = parseInt(editStatus.value);
                 }
- 
+                
+                console.log(todoList);
                 editForm.classList.add("hidden");
                 displayTodos();
-            });         
+            });   
+            
+            document.querySelector("#overlay-close").addEventListener("click", () => {
+                editForm.classList.add("hidden");
+            })
         })
     })
 }
@@ -103,8 +116,10 @@ function deleteTodo() {
 }
 
 function displayTodos() {
+    todoList.sort(compare);
+
     todoListElement.innerHTML = "";
-    document.querySelector("#input-name").value = "";
+    document.querySelector("#edit-input").value = "";
     
     todoList.forEach((item) => {
         const listElement = document.createElement("tr");
@@ -114,21 +129,23 @@ function displayTodos() {
         // Task
         const taskName = document.createElement("td");
         taskName.innerHTML = item.todoText;
-        taskName.classList.add("text-lg", "text-gray-900","font-light", "px-6", "py-4", "whitespace-nowrap", "text-center",);
+        taskName.classList.add("text-xl", "text-gray-900","font-light", "px-6", "py-4", "whitespace-nowrap", "text-center",);
 
 
         const taskStatus = document.createElement("td");
         const taskField = document.createElement("span");
-        taskField.innerHTML = item.status;
+        taskField.innerHTML = status[item.statusCode];
         taskStatus.classList.add("text-center");
-        taskField.classList.add("text-lg", "text-gray-900","font-light", "px-6", "py-4", "whitespace-nowrap", "border-2", "rounded-2xl");
-        if(item.status === "To-Do"){
+        taskField.classList.add("text-xl", "text-gray-900","font-light", "px-6", "py-4", "whitespace-nowrap", "border-2", "rounded-2xl");
+        
+        if(item.statusCode === 0){
             taskField.classList.add("text-red-500", "border-red-500");
-        }else if(item.status === "Completed"){
+        }else if(item.statusCode === 2){
             taskField.classList.add("text-sky-500", "border-sky-500");
-        }else{
+        }else if(item.statusCode === 1){
             taskField.classList.add("text-yellow-500", "border-yellow-500");
         }
+        
         taskStatus.append(taskField);
    
         // Actions
